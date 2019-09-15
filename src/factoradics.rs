@@ -1,35 +1,31 @@
-fn is_ordered_set<T: Ord>(xs: &[T]) -> bool {
-    xs.windows(2).all(|w| w[0] < w[1])
-}
+//! Factorial number system
+//!
+//! See [wikipedia] for more information.
+//!
+//! [wikipedia]: https://en.wikipedia.org/wiki/Factorial_number_system
 
-#[test]
-fn is_ordered_set_ok() {
-    fn test(xs: &[usize], r: bool) {
-        assert_eq!(is_ordered_set(xs), r, "is_ordered_set({:?})", xs);
-    }
-    test(&[0, 1, 2], true);
-    test(&[0, 1, 1], false);
-    test(&[0, 2, 1], false);
-}
-
-fn is_unordered_set<T: Ord>(xs: &[T]) -> bool {
-    let mut xs: Vec<&T> = xs.iter().collect();
-    xs.sort();
-    is_ordered_set(&xs)
-}
-
-#[test]
-fn is_unordered_set_ok() {
-    fn test(xs: &[usize], r: bool) {
-        assert_eq!(is_unordered_set(xs), r, "is_unordered_set({:?})", xs);
-    }
-    test(&[0, 1, 2], true);
-    test(&[0, 1, 1], false);
-    test(&[0, 2, 1], true);
-}
-
+/// Applies the permutation of the value `p` to the slice `xs`.
+///
+/// The applied permutation can be encoded with [`encode`] to get back `p`.
+///
+/// ```rust
+/// # use number_encoding::factoradics::{decode_mut, encode};
+/// # let mut xs = [0, 1, 2, 3];
+/// # let p = 15;
+/// decode_mut(&mut xs, p);
+/// assert_eq!(encode(&xs), p);
+/// ```
+///
+/// See [`decode`] for a version that allocates a vector for the permutation.
+///
+/// # Panics
+///
+/// Panics in debug mode if `xs` is not increasing.
+///
+/// [`decode`]: fn.decode.html
+/// [`encode`]: fn.encode.html
 pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
-    debug_assert!(is_ordered_set(xs), "Failed precondition");
+    debug_assert!(crate::is_ordered_set(xs), "Failed precondition");
     let n = xs.len();
     let mut ps = Vec::with_capacity(n);
     for i in 1 ..= n {
@@ -42,6 +38,35 @@ pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
     }
 }
 
+/// Returns the permutation of the value `p` to the slice `xs`.
+///
+/// The returned permutation can be encoded with [`encode`] to get back `p`.
+///
+/// ```rust
+/// # use number_encoding::factoradics::{decode, encode};
+/// # let xs = [0, 1, 2, 3];
+/// # let p = 15;
+/// let xs = decode(&xs, p);
+/// assert_eq!(encode(&xs), p);
+/// ```
+///
+/// See [`decode_mut`] for a version that applies the permutation to the slice.
+///
+/// # Panics
+///
+/// Panics in debug mode if `xs` is not increasing.
+///
+/// # Examples
+///
+/// ```rust
+/// # use number_encoding::factoradics::decode;
+/// assert_eq!(decode(&[0, 1, 2], 0), &[0, 1, 2]);
+/// assert_eq!(decode(&[0, 1, 2], 1), &[0, 2, 1]);
+/// assert_eq!(decode(&[0, 1, 2], 2), &[1, 0, 2]);
+/// ```
+///
+/// [`decode_mut`]: fn.decode_mut.html
+/// [`encode`]: fn.encode.html
 pub fn decode<T: Clone + Ord>(xs: &[T], p: usize) -> Vec<T> {
     let mut xs = xs.to_vec();
     decode_mut(&mut xs, p);
@@ -56,8 +81,12 @@ fn decode_ok() {
             r.push(i);
         }
         decode_mut(&mut r, p);
-        assert_eq!(r, e, "decode({})", p);
+        assert_eq!(r, e, "p={}", p);
     }
+    test(0, 0, &[]);
+    test(1, 0, &[0]);
+    test(2, 0, &[0, 1]);
+    test(2, 1, &[1, 0]);
     test(3, 0, &[0, 1, 2]);
     test(3, 1, &[0, 2, 1]);
     test(3, 2, &[1, 0, 2]);
@@ -66,8 +95,35 @@ fn decode_ok() {
     test(3, 5, &[2, 1, 0]);
 }
 
+/// Returns the value of a permutation.
+///
+/// The returned value can be decoded with [`decode`] to get back `xs`.
+///
+/// ```rust
+/// # use number_encoding::factoradics::{decode, encode};
+/// # let xs = &[2, 0, 1];
+/// let mut ys = xs.to_vec();
+/// ys.sort();
+/// let p = encode(xs);
+/// assert_eq!(decode(&ys, p), xs);
+/// ```
+///
+/// # Panics
+///
+/// Panics in debug mode if `xs` does not contain distinct elements.
+///
+/// # Examples
+///
+/// ```rust
+/// # use number_encoding::factoradics::encode;
+/// assert_eq!(encode(&[0, 1, 2]), 0);
+/// assert_eq!(encode(&[0, 2, 1]), 1);
+/// assert_eq!(encode(&[1, 0, 2]), 2);
+/// ```
+///
+/// [`decode`]: fn.decode.html
 pub fn encode<T: Ord>(xs: &[T]) -> usize {
-    debug_assert!(is_unordered_set(xs), "Failed precondition");
+    debug_assert!(crate::is_unordered_set(xs), "Failed precondition");
     let n = xs.len();
     let mut ps = Vec::with_capacity(n);
     for i in 0 .. n {
@@ -85,8 +141,12 @@ pub fn encode<T: Ord>(xs: &[T]) -> usize {
 #[test]
 fn encode_ok() {
     fn test(xs: &[usize], p: usize) {
-        assert_eq!(encode(xs), p, "encode({:?})", xs);
+        assert_eq!(encode(xs), p, "xs={:?}", xs);
     }
+    test(&[], 0);
+    test(&[0], 0);
+    test(&[0, 1], 0);
+    test(&[1, 0], 1);
     test(&[0, 1, 2], 0);
     test(&[0, 2, 1], 1);
     test(&[1, 0, 2], 2);
