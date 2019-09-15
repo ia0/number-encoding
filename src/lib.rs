@@ -2,7 +2,7 @@ pub mod combinadics;
 pub mod factoradics;
 
 pub fn gcd(mut a: usize, mut b: usize) -> usize {
-    assert!(a > 0 || b > 0, "Failed precondition");
+    debug_assert!(a > 0 || b > 0, "Failed precondition");
     while b > 0 {
         a %= b;
         std::mem::swap(&mut a, &mut b);

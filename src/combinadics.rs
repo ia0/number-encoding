@@ -25,7 +25,7 @@ fn encode_ok() {
 }
 
 pub fn decode_mut(mut n: usize, mut k: usize, r: &mut [usize]) {
-    assert_eq!(r.len(), k, "Failed precondition");
+    debug_assert_eq!(r.len(), k, "Failed precondition");
     while k > 0 {
         let mut i = k;
         let mut x = 1;

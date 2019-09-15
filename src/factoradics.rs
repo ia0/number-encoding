@@ -29,14 +29,14 @@ fn is_unordered_set_ok() {
 }
 
 pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
-    assert!(is_ordered_set(xs));
+    debug_assert!(is_ordered_set(xs), "Failed precondition");
     let n = xs.len();
     let mut ps = Vec::with_capacity(n);
     for i in 1 ..= n {
         ps.push(p % i);
         p /= i;
     }
-    assert_eq!(p, 0, "Failed precondition");
+    debug_assert_eq!(p, 0, "Failed precondition");
     for (i, &p) in ps.iter().rev().enumerate() {
         xs[i ..= i + p].rotate_right(1);
     }
@@ -67,7 +67,7 @@ fn decode_ok() {
 }
 
 pub fn encode<T: Ord>(xs: &[T]) -> usize {
-    assert!(is_unordered_set(xs), "Failed precondition");
+    debug_assert!(is_unordered_set(xs), "Failed precondition");
     let n = xs.len();
     let mut ps = Vec::with_capacity(n);
     for i in 0 .. n {
