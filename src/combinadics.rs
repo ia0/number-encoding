@@ -183,24 +183,36 @@ fn encode_ok() {
     test(&[0, 1, 5], 10);
 }
 
-/// Iterates over all k-combinations in value order.
+/// Iterates over all k-combinations.
+///
+/// The k-combinations are iterated in value order:
+///
+/// ```rust
+/// # use number_encoding::combinadics::{Iter, encode};
+/// # use number_encoding::combination;
+/// # let n = 5;
+/// # let k = 3;
+/// let mut iter = Iter::new(k);
+/// for i in 0 .. combination(n, k) {
+///     assert_eq!(encode(iter.get()), i);
+///     iter.advance();
+/// }
+/// ```
 ///
 /// # Examples
 ///
 /// To iterate over all `k`-combinations in a set of `n` elements:
 ///
 /// ```rust
-/// # use number_encoding::combinadics::{Iter, encode};
+/// # use number_encoding::combinadics::Iter;
 /// # use number_encoding::combination;
 /// # fn process(xs: &[usize]) {}
 /// # let n = 5;
 /// # let k = 3;
 /// let mut iter = Iter::new(k);
-/// for i in 0 .. combination(n, k) {
-///     let xs = iter.get();  // Returns the current k-combination.
-///     assert_eq!(encode(xs), i);  // The k-combination are iterated in order.
-///     process(xs);
-///     iter.advance();  // Must be called after each iteration.
+/// for _ in 0 .. combination(n, k) {
+///     process(iter.get());
+///     iter.advance();
 /// }
 /// ```
 pub struct Iter {
@@ -218,17 +230,11 @@ impl Iter {
     }
 
     /// Returns the current combination.
-    ///
-    /// The combination lifetime must not overlap with the call to [`advance`].
-    ///
-    /// [`advance`]: struct.Iter.html#method.advance
     pub fn get(&self) -> &[usize] {
         &self.data
     }
 
     /// Advances to the next combination.
-    ///
-    /// The lifetime of the current combination must be over when calling this method.
     pub fn advance(&mut self) {
         let k = self.data.len();
         for i in 0 .. k {

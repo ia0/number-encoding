@@ -175,3 +175,125 @@ fn decode_encode_bij() {
         assert_eq!(encode(&decode(&[0, 1, 2, 3], p)), p);
     }
 }
+
+/// Iterates over all permutations of a slice.
+///
+/// The permutations are iterated in value order:
+///
+/// ```rust
+/// # use number_encoding::factoradics::{Iter, encode};
+/// # let mut xs = [0, 1, 2, 3];
+/// let mut iter = Iter::new(&mut xs);
+/// let mut i = 0;
+/// while let Some(xs) = iter.next() {
+///     assert_eq!(encode(xs), i);
+///     i += 1;
+/// }
+/// ```
+///
+/// If the iteration goes to the end (i.e. [`next`] returns `None`), then the slice is restored to
+/// its initial value (i.e. increasing):
+///
+/// ```rust
+/// # use number_encoding::factoradics::Iter;
+/// # let mut xs = [0, 1, 2, 3];
+/// let saved_xs = xs.clone();
+/// let mut iter = Iter::new(&mut xs);
+/// while iter.next().is_some() {}
+/// assert_eq!(xs, saved_xs);
+/// ```
+///
+/// # Examples
+///
+/// ```rust
+/// # use number_encoding::factoradics::Iter;
+/// # fn process(xs: &[usize]) {}
+/// # let mut xs = [0, 1, 2, 3];
+/// let mut iter = Iter::new(&mut xs);
+/// while let Some(xs) = iter.next() {
+///     process(xs);
+/// }
+/// ```
+///
+/// [`next`]: struct.Iter.html#method.next
+pub struct Iter<'a, T> {
+    data: &'a mut [T],
+    state: IterState,
+}
+
+enum IterState {
+    New,
+    Running,
+    Done,
+}
+
+impl<'a, T: Ord> Iter<'a, T> {
+    /// Constructs an iterator with an increasing slice.
+    ///
+    /// # Panics
+    ///
+    /// Panics in debug mode if `xs` is not increasing.
+    pub fn new(xs: &mut [T]) -> Iter<T> {
+        debug_assert!(crate::is_ordered_set(xs));
+        Iter { data: xs, state: IterState::New }
+    }
+
+    /// Returns the next permutation.
+    ///
+    /// If iteration is over, returns `None`.
+    pub fn next(&mut self) -> Option<&[T]> {
+        match self.state {
+            IterState::New => self.state = IterState::Running,
+            IterState::Running => {
+                if self.advance() {
+                    self.state = IterState::Done;
+                }
+            }
+            IterState::Done => (),
+        }
+        match self.state {
+            IterState::New => unreachable!(),
+            IterState::Running => Some(&self.data),
+            IterState::Done => None,
+        }
+    }
+
+    fn advance(&mut self) -> bool {
+        let k = self.data.len();
+        if k == 0 {
+            return true;
+        }
+        let mut i = k - 1;
+        while i > 0 && self.data[i - 1] > self.data[i] {
+            i -= 1;
+        }
+        if i == 0 {
+            self.data.reverse();
+            return true;
+        }
+        self.data[i ..].reverse();
+        let j = self.data[i ..].iter().position(|x| x > &self.data[i - 1]).unwrap();
+        self.data.swap(i - 1, i + j);
+        false
+    }
+}
+
+#[test]
+fn iter_ok() {
+    fn test(r: &[&[usize]]) {
+        let mut xs = r[0].to_vec();
+        let mut iter = Iter::new(&mut xs);
+        let mut i = 0;
+        while let Some(xs) = iter.next() {
+            assert_eq!(xs, r[i]);
+            assert_eq!(encode(xs), i);
+            i += 1;
+        }
+        assert_eq!(r.len(), i);
+        assert_eq!(xs, r[0]);
+    }
+    test(&[&[]]);
+    test(&[&[0]]);
+    test(&[&[0, 1], &[1, 0]]);
+    test(&[&[0, 1, 2], &[0, 2, 1], &[1, 0, 2], &[1, 2, 0], &[2, 0, 1], &[2, 1, 0]]);
+}
