@@ -229,6 +229,16 @@ impl Iter {
         Iter { data }
     }
 
+    /// Constructs an iterator starting from a given k-combination.
+    ///
+    /// # Panics
+    ///
+    /// Panics in debug mode if `xs` is not increasing.
+    pub fn new_from(xs: Vec<usize>) -> Iter {
+        debug_assert!(crate::is_ordered_set(&xs), "Failed precondition");
+        Iter { data: xs }
+    }
+
     /// Returns the current combination.
     pub fn get(&self) -> &[usize] {
         &self.data
@@ -268,6 +278,35 @@ fn iter_ok() {
             &[0, 2, 3],
             &[1, 2, 3],
             &[0, 1, 4],
+            &[0, 2, 4],
+            &[1, 2, 4],
+            &[0, 3, 4],
+            &[1, 3, 4],
+            &[2, 3, 4],
+            &[0, 1, 5],
+            &[0, 2, 5],
+            &[1, 2, 5],
+        ],
+    );
+}
+
+#[test]
+fn iter_new_from_ok() {
+    fn test(xs: &[usize], r: &[&[usize]]) {
+        let mut iter = Iter::new_from(xs.to_vec());
+        let start = encode(xs);
+        for (i, &r) in r.iter().enumerate() {
+            assert_eq!(iter.get(), r);
+            assert_eq!(encode(r), start + i);
+            iter.advance();
+        }
+    }
+    test(&[], &[&[]]);
+    test(&[2], &[&[2], &[3], &[4]]);
+    test(&[0, 3], &[&[0, 3], &[1, 3], &[2, 3]]);
+    test(
+        &[0, 2, 4],
+        &[
             &[0, 2, 4],
             &[1, 2, 4],
             &[0, 3, 4],
