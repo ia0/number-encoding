@@ -15,8 +15,8 @@ jobs:
         rust: [stable, nightly]
         features:
           - ''
-          # - '--no-default-features --features=alloc'
-          # - '--no-default-features'
+          - '--no-default-features --features=alloc'
+          - '--no-default-features'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
