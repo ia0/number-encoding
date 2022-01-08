@@ -241,6 +241,7 @@ impl<'a, T: Ord> Iter<'a, T> {
     /// Returns the next permutation.
     ///
     /// If iteration is over, returns `None`.
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<&[T]> {
         match self.state {
             IterState::New => self.state = IterState::Running,
@@ -253,7 +254,7 @@ impl<'a, T: Ord> Iter<'a, T> {
         }
         match self.state {
             IterState::New => unreachable!(),
-            IterState::Running => Some(&self.data),
+            IterState::Running => Some(self.data),
             IterState::Done => None,
         }
     }
