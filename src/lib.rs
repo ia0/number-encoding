@@ -17,6 +17,7 @@
 //! This crate provides some helper functions to play with combinations and factorials.
 
 #![no_std]
+#![warn(unused_results, missing_docs)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -26,7 +27,6 @@ extern crate std;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
-#[cfg(feature = "alloc")]
 pub mod combinadics;
 #[cfg(feature = "alloc")]
 pub mod factoradics;

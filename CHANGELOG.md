@@ -1,5 +1,9 @@
 # Changelog
 
+### Major
+
+- Change combinatorics::Iter type by taking BorrowMut
+
 ### Minor
 
 - Add no-std and alloc support
