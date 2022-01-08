@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Combinatorial and factorial number systems
+//! Number systems
 //!
-//! This crate provides some helper functions to play with combinations and factorials.
+//! This crate provides number systems for combinations, factorials, and sequences of bits.
 
 #![no_std]
 #![warn(unused_results, missing_docs)]
@@ -30,6 +30,7 @@ use alloc::vec::Vec;
 pub mod combinadics;
 #[cfg(feature = "alloc")]
 pub mod factoradics;
+pub mod sequences;
 
 /// Returns the greatest common divisor of `a` and `b`.
 ///

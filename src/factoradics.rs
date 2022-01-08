@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,9 +37,6 @@ use alloc::vec::Vec;
 /// # Panics
 ///
 /// Panics in debug mode if `xs` is not increasing.
-///
-/// [`decode`]: fn.decode.html
-/// [`encode`]: fn.encode.html
 pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
     debug_assert!(crate::is_ordered_set(xs), "Failed precondition");
     let n = xs.len();
@@ -80,9 +77,6 @@ pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
 /// assert_eq!(decode(&[0, 1, 2], 1), &[0, 2, 1]);
 /// assert_eq!(decode(&[0, 1, 2], 2), &[1, 0, 2]);
 /// ```
-///
-/// [`decode_mut`]: fn.decode_mut.html
-/// [`encode`]: fn.encode.html
 pub fn decode<T: Clone + Ord>(xs: &[T], p: usize) -> Vec<T> {
     let mut xs = xs.to_vec();
     decode_mut(&mut xs, p);
@@ -136,8 +130,6 @@ fn decode_ok() {
 /// assert_eq!(encode(&[0, 2, 1]), 1);
 /// assert_eq!(encode(&[1, 0, 2]), 2);
 /// ```
-///
-/// [`decode`]: fn.decode.html
 pub fn encode<T: Ord>(xs: &[T]) -> usize {
     debug_assert!(crate::is_unordered_set(xs), "Failed precondition");
     let n = xs.len();
@@ -193,8 +185,8 @@ fn decode_encode_bij() {
 /// }
 /// ```
 ///
-/// If the iteration goes to the end (i.e. [`next`] returns `None`), then the slice is restored to
-/// its initial value (i.e. increasing):
+/// If the iteration goes to the end (i.e. [`next`](Iter::next) returns `None`), then the slice is
+/// restored to its initial value (i.e. increasing):
 ///
 /// ```rust
 /// # use number_encoding::factoradics::Iter;
@@ -216,8 +208,6 @@ fn decode_encode_bij() {
 ///     process(xs);
 /// }
 /// ```
-///
-/// [`next`]: struct.Iter.html#method.next
 pub struct Iter<'a, T> {
     data: &'a mut [T],
     state: IterState,
