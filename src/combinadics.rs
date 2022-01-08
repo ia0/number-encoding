@@ -18,8 +18,11 @@
 //!
 //! [wikipedia]: https://en.wikipedia.org/wiki/Combinatorial_number_system
 
+#[cfg(feature = "alloc")]
 use alloc::vec;
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
+use core::borrow::BorrowMut;
 
 /// Writes the combination of a value to a slice.
 ///
@@ -91,6 +94,7 @@ pub fn decode_mut(mut n: usize, mut k: usize, r: &mut [usize]) {
 ///
 /// [`decode_mut`]: fn.decode_mut.html
 /// [`encode`]: fn.encode.html
+#[cfg(feature = "alloc")]
 pub fn decode(n: usize, k: usize) -> Vec<usize> {
     let mut r = vec![0; k];
     decode_mut(n, k, &mut r);
@@ -218,18 +222,38 @@ fn encode_ok() {
 ///     iter.advance();
 /// }
 /// ```
-pub struct Iter {
-    data: Vec<usize>,
+///
+/// In a no-std environment, you can pass a buffer of size `K`:
+///
+/// ```rust
+/// # use number_encoding::combinadics::Iter;
+/// # const K: usize = 3;
+/// let mut buffer = [0usize; K];
+/// let mut iter = Iter::new_with_buffer(&mut buffer[..]);
+/// ```
+pub struct Iter<T: BorrowMut<[usize]>> {
+    data: T,
 }
 
-impl Iter {
+#[cfg(feature = "alloc")]
+impl Iter<Vec<usize>> {
     /// Constructs an iterator.
-    pub fn new(k: usize) -> Iter {
+    pub fn new(k: usize) -> Iter<Vec<usize>> {
         let mut data = Vec::new();
         for i in 0 .. k {
             data.push(i);
         }
         Iter { data }
+    }
+}
+
+impl<T: BorrowMut<[usize]>> Iter<T> {
+    /// Constructs an iterator with a buffer.
+    pub fn new_with_buffer(mut buffer: T) -> Iter<T> {
+        for (i, x) in buffer.borrow_mut().iter_mut().enumerate() {
+            *x = i;
+        }
+        Iter { data: buffer }
     }
 
     /// Constructs an iterator starting from a given k-combination.
@@ -237,25 +261,25 @@ impl Iter {
     /// # Panics
     ///
     /// Panics in debug mode if `xs` is not increasing.
-    pub fn new_from(xs: Vec<usize>) -> Iter {
-        debug_assert!(crate::is_ordered_set(&xs), "Failed precondition");
+    pub fn new_from(xs: T) -> Iter<T> {
+        debug_assert!(crate::is_ordered_set(xs.borrow()), "Failed precondition");
         Iter { data: xs }
     }
 
     /// Returns the current combination.
     pub fn get(&self) -> &[usize] {
-        &self.data
+        self.data.borrow()
     }
 
     /// Advances to the next combination.
     pub fn advance(&mut self) {
-        let k = self.data.len();
+        let k = self.data.borrow().len();
         for i in 0 .. k {
-            self.data[i] += 1;
-            if i == k - 1 || self.data[i] < self.data[i + 1] {
+            self.data.borrow_mut()[i] += 1;
+            if i == k - 1 || self.data.borrow()[i] < self.data.borrow()[i + 1] {
                 break;
             }
-            self.data[i] = i;
+            self.data.borrow_mut()[i] = i;
         }
     }
 }
