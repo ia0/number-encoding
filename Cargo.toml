@@ -9,4 +9,7 @@ description = "Combinatorial and factorial number systems"
 include = ["Cargo.toml", "LICENSE", "README.md", "src/*"]
 edition = "2018"
 
-[dependencies]
+[features]
+default = ["std"]
+alloc = []
+std = ["alloc"]

@@ -16,7 +16,19 @@
 //!
 //! This crate provides some helper functions to play with combinations and factorials.
 
+#![no_std]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
+
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+
+#[cfg(feature = "alloc")]
 pub mod combinadics;
+#[cfg(feature = "alloc")]
 pub mod factoradics;
 
 /// Returns the greatest common divisor of `a` and `b`.
@@ -43,7 +55,7 @@ pub fn greatest_common_divisor(mut a: usize, mut b: usize) -> usize {
     debug_assert!(a > 0 || b > 0, "Failed precondition");
     while b > 0 {
         a %= b;
-        std::mem::swap(&mut a, &mut b);
+        core::mem::swap(&mut a, &mut b);
     }
     a
 }
@@ -160,6 +172,7 @@ fn combination_ok() {
     }
 }
 
+#[cfg_attr(not(feature = "alloc"), allow(dead_code))]
 fn is_ordered_set<T: Ord>(xs: &[T]) -> bool {
     xs.windows(2).all(|w| w[0] < w[1])
 }
@@ -174,6 +187,7 @@ fn is_ordered_set_ok() {
     test(&[1, 0], false);
 }
 
+#[cfg(feature = "alloc")]
 fn is_unordered_set<T: Ord>(xs: &[T]) -> bool {
     let mut xs: Vec<&T> = xs.iter().collect();
     xs.sort();

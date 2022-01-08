@@ -18,6 +18,8 @@
 //!
 //! [wikipedia]: https://en.wikipedia.org/wiki/Factorial_number_system
 
+use alloc::vec::Vec;
+
 /// Applies the permutation of the value `p` to the slice `xs`.
 ///
 /// The applied permutation can be encoded with [`encode`] to get back `p`.

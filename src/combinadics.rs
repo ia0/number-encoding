@@ -18,6 +18,9 @@
 //!
 //! [wikipedia]: https://en.wikipedia.org/wiki/Combinatorial_number_system
 
+use alloc::vec;
+use alloc::vec::Vec;
+
 /// Writes the combination of a value to a slice.
 ///
 /// The written combination can be encoded with [`encode`] to get back `n`.
