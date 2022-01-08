@@ -7,6 +7,7 @@
 ### Minor
 
 - Add no-std and alloc support
+- Add bit sequence support
 
 ### Patch
 

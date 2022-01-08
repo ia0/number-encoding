@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,9 +42,6 @@ use core::borrow::BorrowMut;
 /// # Panics
 ///
 /// Panics in debug mode if `n > 0 && k == 0`.
-///
-/// [`decode`]: fn.decode.html
-/// [`encode`]: fn.encode.html
 pub fn decode_mut(mut n: usize, mut k: usize, r: &mut [usize]) {
     debug_assert_eq!(r.len(), k, "Failed precondition");
     debug_assert!(k > 0 || n == 0, "Failed precondition");
@@ -91,9 +88,6 @@ pub fn decode_mut(mut n: usize, mut k: usize, r: &mut [usize]) {
 /// assert_eq!(decode(1, 3), &[0, 1, 3]);
 /// assert_eq!(decode(2, 3), &[0, 2, 3]);
 /// ```
-///
-/// [`decode_mut`]: fn.decode_mut.html
-/// [`encode`]: fn.encode.html
 #[cfg(feature = "alloc")]
 pub fn decode(n: usize, k: usize) -> Vec<usize> {
     let mut r = vec![0; k];
@@ -154,8 +148,6 @@ fn decode_ok() {
 /// assert_eq!(encode(&[0, 1, 4]), 4);
 /// assert_eq!(encode(&[0, 2, 4]), 5);
 /// ```
-///
-/// [`decode`]: fn.decode.html
 pub fn encode(xs: &[usize]) -> usize {
     debug_assert!(crate::is_ordered_set(xs), "Failed precondition");
     let mut r = 0;

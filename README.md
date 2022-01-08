@@ -1,4 +1,4 @@
-# Combinatorial and factorial number systems
+# Number systems
 
 [![Latest Version][version_badge]][crates_io]
 [![Documentation][documentation_badge]][documentation]
@@ -7,8 +7,8 @@
 [![Coverage Status][coveralls_badge]][coveralls]
 [![Dependency Status][dependency_badge]][dependency]
 
-This library provide functions to encode and decode [combinadics] and
-[factoradics].
+This library provide functions to encode and decode [combinadics],
+[factoradics], and sequences of bits.
 
 ## Disclaimer
 
