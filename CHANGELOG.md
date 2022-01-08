@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.2.0
+
 ### Major
 
 - Change combinatorics::Iter type by taking BorrowMut
