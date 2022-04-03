@@ -18,6 +18,7 @@
 //!
 //! [wikipedia]: https://en.wikipedia.org/wiki/Factorial_number_system
 
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
 /// Applies the permutation of the value `p` to the slice `xs`.
@@ -36,19 +37,20 @@ use alloc::vec::Vec;
 ///
 /// # Panics
 ///
-/// Panics in debug mode if `xs` is not increasing.
+/// Panics in debug mode if `xs` is not increasing or `p` is out of range.
 pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
-    debug_assert!(crate::is_ordered_set(xs), "Failed precondition");
     let n = xs.len();
-    let mut ps = Vec::with_capacity(n);
-    for i in 1 ..= n {
-        ps.push(p % i);
-        p /= i;
+    let mut m = crate::factorial(n);
+    debug_assert!(crate::is_ordered_set(xs), "Failed precondition");
+    debug_assert!(p < m, "Failed precondition");
+    for i in 0 .. n {
+        m /= n - i;
+        let j = i + p / m;
+        p %= m;
+        xs[i ..= j].rotate_right(1);
     }
-    debug_assert_eq!(p, 0, "Failed precondition");
-    for (i, &p) in ps.iter().rev().enumerate() {
-        xs[i ..= i + p].rotate_right(1);
-    }
+    debug_assert_eq!(m, 1);
+    debug_assert_eq!(p, 0);
 }
 
 /// Returns the permutation of the value `p` to the slice `xs`.
@@ -67,7 +69,7 @@ pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
 ///
 /// # Panics
 ///
-/// Panics in debug mode if `xs` is not increasing.
+/// Panics in debug mode if `xs` is not increasing or `p` is out of range.
 ///
 /// # Examples
 ///
@@ -77,21 +79,19 @@ pub fn decode_mut<T: Ord>(xs: &mut [T], mut p: usize) {
 /// assert_eq!(decode(&[0, 1, 2], 1), &[0, 2, 1]);
 /// assert_eq!(decode(&[0, 1, 2], 2), &[1, 0, 2]);
 /// ```
+#[cfg(feature = "alloc")]
 pub fn decode<T: Clone + Ord>(xs: &[T], p: usize) -> Vec<T> {
     let mut xs = xs.to_vec();
-    decode_mut(&mut xs, p);
+    decode_mut(&mut xs[..], p);
     xs
 }
 
 #[test]
 fn decode_ok() {
     fn test(d: usize, p: usize, e: &[usize]) {
-        let mut r = Vec::with_capacity(d);
-        for i in 0 .. d {
-            r.push(i);
-        }
+        let mut r: Vec<_> = (0 .. d).collect();
         decode_mut(&mut r, p);
-        assert_eq!(r, e, "p={}", p);
+        assert_eq!(r, e, "p={p}");
     }
     test(0, 0, &[]);
     test(1, 0, &[0]);
@@ -133,23 +133,20 @@ fn decode_ok() {
 pub fn encode<T: Ord>(xs: &[T]) -> usize {
     debug_assert!(crate::is_unordered_set(xs), "Failed precondition");
     let n = xs.len();
-    let mut ps = Vec::with_capacity(n);
-    for i in 0 .. n {
-        ps.push(xs[i + 1 ..].iter().filter(|&x| x < &xs[i]).count());
-    }
+    let mut m = crate::factorial(n);
     let mut r = 0;
-    let mut k = 1;
-    for (i, &p) in ps.iter().rev().enumerate() {
-        r += p * k;
-        k *= i + 1;
+    for i in 0 .. n {
+        m /= n - i;
+        r += m * xs[i + 1 ..].iter().filter(|&x| x < &xs[i]).count();
     }
+    debug_assert_eq!(m, 1);
     r
 }
 
 #[test]
 fn encode_ok() {
     fn test(xs: &[usize], p: usize) {
-        assert_eq!(encode(xs), p, "xs={:?}", xs);
+        assert_eq!(encode(xs), p, "xs={xs:?}");
     }
     test(&[], 0);
     test(&[0], 0);
@@ -161,13 +158,6 @@ fn encode_ok() {
     test(&[1, 2, 0], 3);
     test(&[2, 0, 1], 4);
     test(&[2, 1, 0], 5);
-}
-
-#[test]
-fn decode_encode_bij() {
-    for p in 0 .. 24 {
-        assert_eq!(encode(&decode(&[0, 1, 2, 3], p)), p);
-    }
 }
 
 /// Iterates over all permutations of a slice.
@@ -289,4 +279,30 @@ fn iter_ok() {
     test(&[&[0]]);
     test(&[&[0, 1], &[1, 0]]);
     test(&[&[0, 1, 2], &[0, 2, 1], &[1, 0, 2], &[1, 2, 0], &[2, 0, 1], &[2, 1, 0]]);
+    test(&[
+        &[0, 1, 2, 3],
+        &[0, 1, 3, 2],
+        &[0, 2, 1, 3],
+        &[0, 2, 3, 1],
+        &[0, 3, 1, 2],
+        &[0, 3, 2, 1],
+        &[1, 0, 2, 3],
+        &[1, 0, 3, 2],
+        &[1, 2, 0, 3],
+        &[1, 2, 3, 0],
+        &[1, 3, 0, 2],
+        &[1, 3, 2, 0],
+        &[2, 0, 1, 3],
+        &[2, 0, 3, 1],
+        &[2, 1, 0, 3],
+        &[2, 1, 3, 0],
+        &[2, 3, 0, 1],
+        &[2, 3, 1, 0],
+        &[3, 0, 1, 2],
+        &[3, 0, 2, 1],
+        &[3, 1, 0, 2],
+        &[3, 1, 2, 0],
+        &[3, 2, 0, 1],
+        &[3, 2, 1, 0],
+    ]);
 }

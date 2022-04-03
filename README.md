@@ -7,8 +7,11 @@
 [![Coverage Status][coveralls_badge]][coveralls]
 [![Dependency Status][dependency_badge]][dependency]
 
-This library provide functions to encode and decode [combinadics],
-[factoradics], and sequences of bits.
+This library provide functions to encode and decode:
+- subset selection ([combinadics]),
+- set permutation ([factoradics]),
+- multiset permutation, and
+- sequences of bits.
 
 ## Disclaimer
 
