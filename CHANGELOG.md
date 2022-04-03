@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor
+
+- Add multinomial and multiset permutation support
+- Remove alloc constraint on factoradics
+
 ## 0.2.0
 
 ### Major

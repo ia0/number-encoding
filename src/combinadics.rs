@@ -98,7 +98,7 @@ pub fn decode(n: usize, k: usize) -> Vec<usize> {
 #[test]
 fn decode_ok() {
     fn test(n: usize, k: usize, r: &[usize]) {
-        assert_eq!(decode(n, k), r, "n={} k={}", n, k);
+        assert_eq!(decode(n, k), r, "n={n} k={k}");
     }
     test(0, 0, &[]);
     test(0, 1, &[0]);
@@ -160,7 +160,7 @@ pub fn encode(xs: &[usize]) -> usize {
 #[test]
 fn encode_ok() {
     fn test(xs: &[usize], r: usize) {
-        assert_eq!(encode(xs), r, "xs={:?}", xs);
+        assert_eq!(encode(xs), r, "xs={xs:?}");
     }
     test(&[], 0);
     test(&[0], 0);
@@ -231,11 +231,7 @@ pub struct Iter<T: BorrowMut<[usize]>> {
 impl Iter<Vec<usize>> {
     /// Constructs an iterator.
     pub fn new(k: usize) -> Iter<Vec<usize>> {
-        let mut data = Vec::new();
-        for i in 0 .. k {
-            data.push(i);
-        }
-        Iter { data }
+        Iter { data: (0 .. k).collect() }
     }
 }
 

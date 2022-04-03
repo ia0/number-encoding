@@ -14,7 +14,8 @@
 
 //! Number systems
 //!
-//! This crate provides number systems for combinations, factorials, and sequences of bits.
+//! This crate provides number systems for combinations, factorials, multinomials, and sequences of
+//! bits.
 
 #![no_std]
 #![warn(unused_results, missing_docs)]
@@ -24,12 +25,9 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "alloc")]
-use alloc::vec::Vec;
-
 pub mod combinadics;
-#[cfg(feature = "alloc")]
 pub mod factoradics;
+pub mod multinadics;
 pub mod sequences;
 
 /// Returns the greatest common divisor of `a` and `b`.
@@ -77,7 +75,7 @@ fn greatest_common_divisor_ok() {
             if a == 0 && b == 0 {
                 continue;
             }
-            assert_eq!(greatest_common_divisor(a, b), spec(a, b), "a={} b={}", a, b);
+            assert_eq!(greatest_common_divisor(a, b), spec(a, b), "a={a} b={b}");
         }
     }
 }
@@ -117,7 +115,7 @@ fn factorial_ok() {
         }
     }
     for n in 0 .. 10 {
-        assert_eq!(factorial(n), spec(n), "n={}", n);
+        assert_eq!(factorial(n), spec(n), "n={n}");
     }
 }
 
@@ -168,12 +166,53 @@ fn combination_ok() {
     }
     for n in 0 .. 5 {
         for k in 0 .. 5 {
-            assert_eq!(combination(n, k), spec(n, k), "n={} k={}", n, k);
+            assert_eq!(combination(n, k), spec(n, k), "n={n} k={k}");
         }
     }
 }
 
-#[cfg_attr(not(feature = "alloc"), allow(dead_code))]
+/// Returns the number of permutations of a multiset.
+///
+/// See [wikipedia] for more information.
+///
+/// # Examples
+///
+/// ```rust
+/// # use number_encoding::multinomial;
+/// assert_eq!(multinomial(&[2, 0, 1]), 6);
+/// assert_eq!(multinomial(&[0, 1, 0]), 3);
+/// assert_eq!(multinomial(&[0, 1, 1, 0, 2, 0]), 60);
+/// ```
+///
+/// [wikipedia]: https://en.wikipedia.org/wiki/Multinomial_theorem#Number_of_unique_permutations_of_words
+pub fn multinomial<T: Ord>(xs: &[T]) -> usize {
+    let mut n = xs.len();
+    let mut r = 1;
+    for i in 0 .. xs.len() {
+        if xs[.. i].contains(&xs[i]) {
+            continue;
+        }
+        let k = xs[i ..].iter().filter(|&x| x == &xs[i]).count();
+        r *= combination(n, k);
+        n -= k;
+    }
+    r
+}
+
+#[test]
+fn multinomial_ok() {
+    fn test(xs: &[usize], r: usize) {
+        assert_eq!(multinomial(xs), r, "xs={xs:?}");
+    }
+    test(&[], 1);
+    test(&[0], 1);
+    test(&[0, 0], 1);
+    test(&[0, 1], 2);
+    test(&[0, 1, 0], 3);
+    test(&[0, 1, 0, 1], 6);
+    test(&[0, 1, 1, 0, 2, 0], 60);
+}
+
 fn is_ordered_set<T: Ord>(xs: &[T]) -> bool {
     xs.windows(2).all(|w| w[0] < w[1])
 }
@@ -181,24 +220,36 @@ fn is_ordered_set<T: Ord>(xs: &[T]) -> bool {
 #[test]
 fn is_ordered_set_ok() {
     fn test(xs: &[usize], r: bool) {
-        assert_eq!(is_ordered_set(xs), r, "xs={:?}", xs);
+        assert_eq!(is_ordered_set(xs), r, "xs={xs:?}");
     }
     test(&[0, 1], true);
     test(&[0, 0], false);
     test(&[1, 0], false);
 }
 
-#[cfg(feature = "alloc")]
+// TODO(https://github.com/rust-lang/rust/issues/53485): Use is_sorted.
+fn is_ordered_multiset<T: Ord>(xs: &[T]) -> bool {
+    xs.windows(2).all(|w| w[0] <= w[1])
+}
+
+#[test]
+fn is_ordered_multiset_ok() {
+    fn test(xs: &[usize], r: bool) {
+        assert_eq!(is_ordered_multiset(xs), r, "xs={xs:?}");
+    }
+    test(&[0, 1, 1], true);
+    test(&[0, 0, 1], true);
+    test(&[1, 0], false);
+}
+
 fn is_unordered_set<T: Ord>(xs: &[T]) -> bool {
-    let mut xs: Vec<&T> = xs.iter().collect();
-    xs.sort();
-    is_ordered_set(&xs)
+    xs.iter().all(|x| xs.iter().filter(|&y| x == y).count() == 1)
 }
 
 #[test]
 fn is_unordered_set_ok() {
     fn test(xs: &[usize], r: bool) {
-        assert_eq!(is_unordered_set(xs), r, "xs={:?}", xs);
+        assert_eq!(is_unordered_set(xs), r, "xs={xs:?}");
     }
     test(&[0, 1], true);
     test(&[0, 0], false);

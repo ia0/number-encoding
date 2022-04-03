@@ -43,7 +43,7 @@ pub fn decode_len(s: usize) -> usize {
 #[test]
 fn decode_len_ok() {
     fn test(s: usize, n: usize) {
-        assert_eq!(decode_len(s), n, "s={}", s);
+        assert_eq!(decode_len(s), n, "s={s}");
     }
     test(0, 0);
     test(1, 1);
@@ -118,7 +118,7 @@ pub fn decode(s: usize) -> Vec<bool> {
 #[test]
 fn decode_ok() {
     fn test(s: usize, xs: &[bool]) {
-        assert_eq!(decode(s), xs, "s={} xs={:?}", s, xs);
+        assert_eq!(decode(s), xs, "s={s} xs={xs:?}");
     }
     test(0, &[]);
     test(1, &[false]);
@@ -173,7 +173,7 @@ pub fn encode(xs: &[bool]) -> usize {
 #[test]
 fn encode_ok() {
     fn test(xs: &[bool], s: usize) {
-        assert_eq!(encode(xs), s, "xs={:?}", xs);
+        assert_eq!(encode(xs), s, "xs={xs:?}");
     }
     test(&[], 0);
     test(&[false], 1);
