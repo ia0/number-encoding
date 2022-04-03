@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.2.1
+
 ### Minor
 
 - Add multinomial and multiset permutation support
